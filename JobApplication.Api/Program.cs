@@ -33,8 +33,7 @@ namespace JobApplication.Api
 
             var connectionString =
                 builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException(
-                    "Connection string 'DefaultConnection' not found.");
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -46,22 +45,17 @@ namespace JobApplication.Api
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
-            var jwtSettings =
-                builder.Configuration.GetSection("JwtSettings");
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
             var securityKey =
-                jwtSettings["securityKey"]
-                ?? throw new InvalidOperationException(
-                    "JWT security key not found.");
+                jwtSettings["securityKey"] ?? throw new InvalidOperationException("JWT security key not found.");
 
             builder.Services
                 .AddAuthentication(options =>
                 {
-                    options.DefaultAuthenticateScheme =
-                        JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 
-                    options.DefaultChallengeScheme =
-                        JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 })
                 .AddJwtBearer(options =>
                 {
@@ -77,8 +71,7 @@ namespace JobApplication.Api
                             ValidAudience = jwtSettings["validAudience"],
 
                             IssuerSigningKey =
-                                new SymmetricSecurityKey(
-                                    Encoding.UTF8.GetBytes(securityKey))
+                                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey))
                         };
                 });
 

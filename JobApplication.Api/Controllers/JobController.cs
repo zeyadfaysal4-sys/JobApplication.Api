@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.DTO;
+using JobApplication.Application.DTO;
 using JobApplication.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -53,6 +53,31 @@ namespace JobApplication.Api.Controllers
             {
                 message = "Job closed successfully."
             });
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll()
+        {
+            var jobs = await _jobServices.GetAll();
+            return Ok(jobs);
+        }
+
+        [HttpGet("{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var job = await _jobServices.GetById(id);
+
+            if (job == null)
+            {
+                return NotFound(new 
+                { 
+                    message = "Job not found." 
+                });
+            }
+
+            return Ok(job);
         }
     }
 }

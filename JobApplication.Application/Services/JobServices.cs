@@ -1,4 +1,4 @@
-﻿using JobApplication.Application.DTO;
+using JobApplication.Application.DTO;
 using JobApplication.Application.Interfaces;
 using JobApplication.Domin.Entities;
 
@@ -53,6 +53,16 @@ namespace JobApplication.Application.Services
             job.ClosedBy = recruiterId;
 
             await _jobRepository.CommitAsync();
+        }
+
+        public async Task<IEnumerable<Job>> GetAll()
+        {
+            return await _jobRepository.GetAsync(tracked: false);
+        }
+
+        public async Task<Job?> GetById(int id)
+        {
+            return await _jobRepository.GetOneAsync(j => j.Id == id, tracked: false);
         }
     }
 }
