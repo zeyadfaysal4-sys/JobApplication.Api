@@ -85,6 +85,7 @@ namespace JobApplication.Api
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
             builder.Services.AddOpenApi();
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(JobApplication.Application.Featuers.Jobs.Commands.CreateJob.CreateJobCommand).Assembly));
 
             var app = builder.Build();
 

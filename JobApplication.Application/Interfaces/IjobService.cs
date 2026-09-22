@@ -8,12 +8,12 @@ namespace JobApplication.Application.Interfaces
 {
     public interface IjobService
     {
-        Task<int> Create(CreateJobDto createJobDto, string recruiterId);
+        Task<int> CreateJob(CreateJobDto createJobDto, string recruiterId);
 
-        Task Close(int jobId, string recruiterId);
+        Task CloseJob(int jobId, string recruiterId);
 
-         Task<IEnumerable<Job>> GetAll();
+         Task<IEnumerable<Job>> GetAllJob();
 
-         Task<Job?> GetById(int id);
+         Task<Job?> GetByIdJob(int id);
     }
 }

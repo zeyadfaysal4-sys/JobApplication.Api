@@ -13,7 +13,7 @@ namespace JobApplication.Application.Services
             _jobRepository = jobRepository;
         }
 
-        public async Task<int> Create(CreateJobDto createJobDto,string recruiterId)
+        public async Task<int> CreateJob(CreateJobDto createJobDto,string recruiterId)
         {
             var job = new Job()
             {
@@ -29,7 +29,7 @@ namespace JobApplication.Application.Services
             return job.Id;
         }
 
-        public async Task Close(int jobId, string recruiterId)
+        public async Task CloseJob(int jobId, string recruiterId)
         {
             var job = await _jobRepository.GetOneAsync(j => j.Id == jobId);
 
@@ -55,12 +55,12 @@ namespace JobApplication.Application.Services
             await _jobRepository.CommitAsync();
         }
 
-        public async Task<IEnumerable<Job>> GetAll()
+        public async Task<IEnumerable<Job>> GetAllJob()
         {
             return await _jobRepository.GetAsync(tracked: false);
         }
 
-        public async Task<Job?> GetById(int id)
+        public async Task<Job?> GetByIdJob(int id)
         {
             return await _jobRepository.GetOneAsync(j => j.Id == id, tracked: false);
         }
