@@ -13,5 +13,8 @@ namespace JobApplication.Domin.Entities
         public bool IsActive { get; set; }
         public DateTime? ClosedAt { get; set; }
         public string? ClosedBy { get; set; }
+
+        public DateTime? OpenedAt { get; set; }
+        public string? OpenedBy { get; set; }
     }
 }

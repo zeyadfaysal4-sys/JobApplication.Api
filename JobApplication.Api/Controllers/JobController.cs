@@ -1,5 +1,7 @@
 using JobApplication.Application.DTO;
+using JobApplication.Application.Featuers.Jobs.Commands.CloseJob;
 using JobApplication.Application.Featuers.Jobs.Commands.CreateJob;
+using JobApplication.Application.Featuers.Jobs.Commands.OpenJob;
 using JobApplication.Application.Featuers.Jobs.Queries.GetAllJob;
 using JobApplication.Application.Featuers.Jobs.Queries.GetById;
 using JobApplication.Application.Services;
@@ -15,13 +17,11 @@ namespace JobApplication.Api.Controllers
     [Authorize(Roles = "Recruiter")]
     public class JobController : ControllerBase
     {
-        private readonly JobServices _jobServices;
 
         private readonly IMediator _mediator;
 
-        public JobController(JobServices jobServices, IMediator mediator)
+        public JobController(IMediator mediator)
         {
-            _jobServices = jobServices;
             _mediator = mediator;
         }
 
@@ -51,8 +51,18 @@ namespace JobApplication.Api.Controllers
             });
         }
 
+        /// <summary>
+        /// Closes an active job.
+        /// </summary>
+        /// <param name="id">The ID of the job to close.</param>
+        /// <returns>Confirmation that the job was closed successfully.</returns>
+        /// <response code="200">Job closed successfully.</response>
+        /// <response code="401">User is not authenticated.</response>
+        /// <response code="403">User is not authorized to close this job.</response>
+        /// <response code="404">Job was not found.</response>
+
         [HttpPut("{id}/close")]
-        public async Task<IActionResult> Close(int id)
+        public async Task<IActionResult> CloseJob(int id)
         {
             var recruiterId =User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -61,11 +71,47 @@ namespace JobApplication.Api.Controllers
                 return Unauthorized();
             }
 
-            await _jobServices.CloseJob(id, recruiterId);
+            var jobId = await _mediator.Send(new CloseJobCommand()
+            {
+                JobId = id,
+                RecruiterId = recruiterId
+            });
 
             return Ok(new 
             {
                 message = "Job closed successfully."
+            });
+        }
+
+        /// <summary>
+        /// Opens an inactive job.
+        /// </summary>
+        /// <param name="id">The ID of the job to open.</param>
+        /// <returns>Confirmation that the job was opened successfully.</returns>
+        /// <response code="200">Job opened successfully.</response>
+        /// <response code="401">User is not authenticated.</response>
+        /// <response code="403">User is not authorized to open this job.</response>
+        /// <response code="404">Job was not found.</response>
+
+        [HttpPut("{id}/OpenJob")]
+        public async Task<IActionResult> OpenJob(int id)
+        {
+            var recruiterId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (recruiterId == null)
+            {
+                return Unauthorized();
+            }
+
+             await _mediator.Send(new OpenJobCommand()
+            {
+                JobId = id,
+                RecruiterId = recruiterId
+            });
+
+            return Ok(new
+            {
+                message = "Job opened successfully."
             });
         }
 
