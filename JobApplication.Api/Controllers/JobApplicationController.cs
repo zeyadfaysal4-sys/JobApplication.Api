@@ -1,6 +1,7 @@
-
+using JobApplication.Application.Featuers.JobApplication.Queries.GetAllJob;
 using JobApplication.Application.Featuers.JobApplications.Commands.ApplyJobApplication;
 using JobApplication.Application.Featuers.JobApplications.Commands.CancelJobApplication;
+using JobApplication.Application.Featuers.JobApplications.Queries.GetById;
 using JobApplication.Application.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -63,6 +64,35 @@ namespace JobApplication.Api.Controllers
             });
 
             return Ok("Application cancelled successfully.");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAll()
+        {
+            //var jobs = await _jobServices.GetAllJob();
+            var jobs = await _mediator.Send(new GetAllJobQuery());
+            return Ok(jobs);
+        }
+
+        [HttpGet("{id}/GetById")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetById(int id)
+        {
+            //var job = await _jobServices.GetByIdJob(id);
+            var job = await _mediator.Send(new GetByIdCandidateQuery()
+            {
+                Id = id
+            });
+
+            if (job == null)
+            {
+                return NotFound(new
+                {
+                    message = "Job not found."
+                });
+            }
+            return Ok(job);
         }
     }
 }
