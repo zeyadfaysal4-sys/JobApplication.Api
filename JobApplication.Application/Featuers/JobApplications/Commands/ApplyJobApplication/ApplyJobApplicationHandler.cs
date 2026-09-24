@@ -12,17 +12,19 @@ namespace JobApplication.Application.Featuers.JobApplications.Commands.ApplyJobA
     public class ApplyJobApplicationHandler : IRequestHandler<ApplyJobApplicationCommand>
     {
         private readonly IRepository<Domin.Entities.JobApplication> _jobApplicationRepository;
-        private readonly IRepository<Domin.Entities.Candidate> _candidateRepository;
-        private readonly IRepository<Domin.Entities.Job> _jobRepository;
-
+        private readonly IRepository<Candidate> _candidateRepository;
+        private readonly IRepository<Job> _jobRepository;
+        private readonly IBackgroundJobScheduler _backgroundJobScheduler;   
         public ApplyJobApplicationHandler(
             IRepository<Domin.Entities.JobApplication> jobApplicationRepository,
-            IRepository<Domin.Entities.Candidate> candidateRepository,
-            IRepository<Domin.Entities.Job> jobRepository)
+            IRepository<Candidate> candidateRepository,
+            IRepository<Job> jobRepository,
+            IBackgroundJobScheduler backgroundJobScheduler)
         {
             _jobApplicationRepository = jobApplicationRepository;
             _candidateRepository = candidateRepository;
             _jobRepository = jobRepository;
+            _backgroundJobScheduler = backgroundJobScheduler;
         }
 
         public async Task Handle(ApplyJobApplicationCommand request, CancellationToken cancellationToken)
@@ -66,6 +68,8 @@ namespace JobApplication.Application.Featuers.JobApplications.Commands.ApplyJobA
 
             await _jobApplicationRepository.AddAsync(application);
             await _jobApplicationRepository.CommitAsync();
+
+            _backgroundJobScheduler.Enqueue<INotificationService>(service => service.NotifyRecruiter(application.Id));
         }
     }
 }

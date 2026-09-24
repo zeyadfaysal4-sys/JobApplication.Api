@@ -11,6 +11,7 @@ namespace JobApplication.Domin.Entities
         public string Description { get; set; }
         public string RecruiterId { get; set; }
         public bool IsActive { get; set; }
+        public DateTime? ExpiresAt { get; set; }
         public DateTime? ClosedAt { get; set; }
         public string? ClosedBy { get; set; }
 

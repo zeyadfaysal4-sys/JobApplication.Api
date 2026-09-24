@@ -1,5 +1,4 @@
 using JobApplication.Application.Interfaces;
-using JobApplication.Application.Services;
 using JobApplication.Domin.Entities;
 using JobApplication.Infrastructure.Persistence;
 using JobApplication.Infrastructure.Persistence.DbSeeder;
@@ -9,6 +8,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Hangfire;
+using Hangfire.SqlServer;
+using JobApplication.Infrastructure.Services;
 using System.Text;
 
 namespace JobApplication.Api
@@ -34,6 +36,10 @@ namespace JobApplication.Api
             var connectionString =
                 builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+            var hangfireConnection =
+                builder.Configuration.GetConnectionString("HangfireConnection")
+                ?? throw new InvalidOperationException("Connection string 'HangfireConnection' not found.");
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -75,26 +81,49 @@ namespace JobApplication.Api
                         };
                 });
 
-            builder.Services.AddScoped<JobServices>();
-            builder.Services.AddScoped<JobApplicationServices>();
-
+          
+            builder.Services.AddScoped<IBackgroundJobScheduler, HangfireBackgroundJobScheduler>();
+            builder.Services.AddScoped<INotificationService, EmailNotificationService>();
+            builder.Services.AddScoped<IJobExpirationService, JobExpirationService>();
             builder.Services.AddScoped<IRepository<Job>, Repository<Job>>();
             builder.Services.AddScoped<IRepository<Candidate>, Repository<Candidate>>();
             builder.Services.AddScoped<IRepository<Domin.Entities.JobApplication>, Repository<Domin.Entities.JobApplication>>();
-
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+
+            builder.Services.AddHangfire(config =>
+            {
+                config
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(hangfireConnection);
+            });
+
+            builder.Services.AddHangfireServer();
 
             builder.Services.AddOpenApi();
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(JobApplication.Application.Featuers.Jobs.Commands.CreateJob.CreateJobCommand).Assembly));
 
+
+
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var recurringJobManager =
+                    scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
+                recurringJobManager.AddOrUpdate<IJobExpirationService>(
+                    "check-expired-jobs",
+                    service => service.CheckExpiredJobs(),
+                    Cron.Minutely);
+            }
 
             using (var scope = app.Services.CreateScope())
             {
                 var initializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
                 await initializer.InitializeAsync();
             }
-
+                
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
@@ -107,6 +136,7 @@ namespace JobApplication.Api
 
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseHangfireDashboard("/hangfire");
 
             app.MapControllers();
 

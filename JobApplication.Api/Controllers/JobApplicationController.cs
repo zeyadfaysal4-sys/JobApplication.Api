@@ -2,7 +2,6 @@ using JobApplication.Application.Featuers.JobApplication.Queries.GetAllJob;
 using JobApplication.Application.Featuers.JobApplications.Commands.ApplyJobApplication;
 using JobApplication.Application.Featuers.JobApplications.Commands.CancelJobApplication;
 using JobApplication.Application.Featuers.JobApplications.Queries.GetById;
-using JobApplication.Application.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,14 +14,10 @@ namespace JobApplication.Api.Controllers
     [Authorize(Roles = "Candidate")]
     public class JobApplicationController : ControllerBase
     {
-        private readonly JobApplicationServices _jobApplicationServices;
         private readonly IMediator _mediator;
 
-        public JobApplicationController(
-            JobApplicationServices jobApplicationServices,
-            IMediator mediator)
+        public JobApplicationController(IMediator mediator)
         {
-            _jobApplicationServices = jobApplicationServices;
             _mediator = mediator;
         }
 

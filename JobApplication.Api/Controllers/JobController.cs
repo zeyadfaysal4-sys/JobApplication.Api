@@ -4,7 +4,6 @@ using JobApplication.Application.Featuers.Jobs.Commands.CreateJob;
 using JobApplication.Application.Featuers.Jobs.Commands.OpenJob;
 using JobApplication.Application.Featuers.Jobs.Queries.GetAllJob;
 using JobApplication.Application.Featuers.Jobs.Queries.GetById;
-using JobApplication.Application.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
